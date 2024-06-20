@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Board from './Board';
 import { calculateWinner, getBestMove } from '../utils/gameHelpers';
 
@@ -7,22 +7,22 @@ function Game() {
   const [isXNext, setIsXNext] = useState(true);
   const [isHumanVsComputer, setIsHumanVsComputer] = useState(false);
 
-  const winner = calculateWinner(board);
+  useEffect(() => {
+    if (isHumanVsComputer && !isXNext) {
+      const bestMove = getBestMove(board);
+      setTimeout(() => {
+        handleClick(bestMove, true);
+      }, 500); // Add a slight delay to simulate thinking time
+    }
+  }, [isXNext, isHumanVsComputer, board]);
 
-  const handleClick = (i) => {
-    if (board[i] || winner) return;
+  const handleClick = (i, isComputer = false) => {
+    if (board[i] || calculateWinner(board) || (isHumanVsComputer && !isXNext && !isComputer)) return;
 
     const newBoard = board.slice();
     newBoard[i] = isXNext ? 'X' : 'O';
     setBoard(newBoard);
     setIsXNext(!isXNext);
-
-    if (isHumanVsComputer && !isXNext && !calculateWinner(newBoard)) {
-      const bestMove = getBestMove(newBoard);
-      newBoard[bestMove] = 'O';
-      setBoard(newBoard);
-      setIsXNext(true);
-    }
   };
 
   const startGame = (isHumanVsComputer) => {
@@ -31,10 +31,12 @@ function Game() {
     setIsHumanVsComputer(isHumanVsComputer);
   };
 
+  const winner = calculateWinner(board);
+
   return (
     <div className="game">
       <div className="game-board">
-        <Board squares={board} onClick={handleClick} />
+        <Board squares={board} onClick={(i) => handleClick(i)} />
       </div>
       <div className="game-info">
         <div>{winner ? `Winner: ${winner}` : `Next player: ${isXNext ? 'X' : 'O'}`}</div>

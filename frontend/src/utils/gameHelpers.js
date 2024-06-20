@@ -18,11 +18,51 @@ export const calculateWinner = (squares) => {
     return null;
   };
   
-  export const getBestMove = (board) => {
-    // Minimax algorithm logic to determine the best move
-    // This is a simplified placeholder, you need to implement the full algorithm
+  const minimax = (board, depth, isMaximizing) => {
+    const winner = calculateWinner(board);
+    if (winner === 'X') return -10 + depth;
+    if (winner === 'O') return 10 - depth;
+    if (board.every(square => square !== null)) return 0;
   
-    const emptySquares = board.map((square, index) => square === null ? index : null).filter(val => val !== null);
-    return emptySquares[Math.floor(Math.random() * emptySquares.length)];
+    if (isMaximizing) {
+      let bestScore = -Infinity;
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] === null) {
+          board[i] = 'O';
+          const score = minimax(board, depth + 1, false);
+          board[i] = null;
+          bestScore = Math.max(score, bestScore);
+        }
+      }
+      return bestScore;
+    } else {
+      let bestScore = Infinity;
+      for (let i = 0; i < board.length; i++) {
+        if (board[i] === null) {
+          board[i] = 'X';
+          const score = minimax(board, depth + 1, true);
+          board[i] = null;
+          bestScore = Math.min(score, bestScore);
+        }
+      }
+      return bestScore;
+    }
+  };
+  
+  export const getBestMove = (board) => {
+    let bestMove;
+    let bestScore = -Infinity;
+    for (let i = 0; i < board.length; i++) {
+      if (board[i] === null) {
+        board[i] = 'O';
+        const score = minimax(board, 0, false);
+        board[i] = null;
+        if (score > bestScore) {
+          bestScore = score;
+          bestMove = i;
+        }
+      }
+    }
+    return bestMove;
   };
   
